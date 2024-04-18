@@ -4,7 +4,6 @@ controllers:
         namespace: App\Controller
     type: attribute
 
-# config/routes.yaml
 generate_pdf:
     path: /generate-pdf
     controller: App\Controller\PdfController::generatePdf

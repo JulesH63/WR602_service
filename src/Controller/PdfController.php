@@ -24,11 +24,7 @@ class PdfController extends AbstractController
     {
         $htmlContent = $request->getContent();
         $pdfContent = $this->gotenbergService->generatePdfFromHtml($htmlContent);
-
-        // Créer une réponse avec le contenu PDF
         $response = new Response($pdfContent);
-
-        // Définir les en-têtes de la réponse pour indiquer que c'est un fichier PDF
         $response->headers->set('Content-Type', 'application/pdf');
 
         return $response;
