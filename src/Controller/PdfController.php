@@ -2,31 +2,31 @@
 
 namespace App\Controller;
 
-use App\Service\GotenbergService;
+use App\Service\PdfRequestService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
+#[Route('/pdf/download', name: 'app_pdf_download')]
 class PdfController extends AbstractController
 {
-    private GotenbergService $gotenbergService;
-
-    public function __construct(GotenbergService $gotenbergService)
+    public function __construct(
+        private PdfRequestService $pdfRequestService,
+    )
     {
-        $this->gotenbergService = $gotenbergService;
     }
 
-    /**
-     * @Route("/generate-pdf", name="generate_pdf", methods={"POST"})
-     */
-    public function generatePdf(Request $request): Response
+    #[Route('/url', name: 'app_pdf_url')]
+    public function index(Request $request)
     {
-        $htmlContent = $request->getContent();
-        $pdfContent = $this->gotenbergService->generatePdfFromHtml($htmlContent);
-        $response = new Response($pdfContent);
-        $response->headers->set('Content-Type', 'application/pdf');
+        $url = $request->get('url');
 
-        return $response;
+        // Appel du service PdfRequestService qui va envoyer l'url du PDF à Gotenberg
+        $pdfContent = $this->pdfRequestService->generatePdfFromUrl($url);
+
+        return new Response($pdfContent, Response::HTTP_OK, ['Content-Type' => 'application/pdf']);
     }
 }
