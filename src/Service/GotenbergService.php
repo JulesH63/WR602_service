@@ -4,27 +4,27 @@ namespace App\Service;
 
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-class GotenbergService
+class PdfRequestService
 {
-    private HttpClientInterface $client;
-    private string $gotenbergUrl;
 
-    public function __construct(HttpClientInterface $client, string $gotenbergUrl)
+    public function __construct(private HttpClientInterface $client)
     {
-        $this->client = $client;
-        $this->gotenbergUrl = $gotenbergUrl;
     }
 
-    public function generatePdfFromHtml(string $htmlContent): string
+    public function generatePdfFromUrl(string $url): string
     {
-        $response = $this->client->request('POST', $this->gotenbergUrl, [
-            'headers' => [
-                'Content-Type' => 'multipart/form-data',
-            ],
-            'body' => [
-                'html' => $htmlContent,
-            ],
-        ]);
+        $response = $this->client->request(
+            'POST',
+            $_ENV['GOTENBERG_URL'] . '/forms/chromium/convert/url',
+            [
+                'headers' => [
+                    'Content-Type' => 'multipart/form-data',
+                ],
+                'body' => [
+                    'url' => $url
+                ]
+            ]
+        );
 
         return $response->getContent();
     }
