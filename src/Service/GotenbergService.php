@@ -1,13 +1,11 @@
 <?php
-
 namespace App\Service;
 
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class GotenbergService
 {
-    private $client;
-    private $gotenbergBaseUrl;
+    private string $gotenbergBaseUrl;
 
     public function __construct(HttpClientInterface $client, string $gotenbergBaseUrl)
     {

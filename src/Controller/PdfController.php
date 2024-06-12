@@ -2,29 +2,42 @@
 
 namespace App\Controller;
 
-use App\Service\GotenbergService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Component\HttpFoundation\Response;
 
-#[Route('/pdf/download', name: 'app_pdf_download')]
 class PdfController extends AbstractController
 {
-    public function __construct(
-        private GotenbergService $pdfRequestService,
-    )
+    #[Route('/pdf/download/url', name: 'app_download_url')]
+    public function convertUrlToPdf(
+        Request $request,
+        HttpClientInterface $client
+    ): Response
     {
-    }
+        $url = $request->request->get('url');
 
-    #[Route('/url', name: 'app_pdf_url')]
-    public function index(Request $request): Response
-    {
-        $url = $request->get('url');
+        $response = $client->request('POST', 'http://localhost:3000/forms/chromium/convert/url', [
+            'headers' => [
+                'Content-Type' => 'multipart/form-data',
+            ],
+            'body' => [
+                'url' => $url,
+            ]
+        ]);
 
-        // Appel du service GotenbergService qui va envoyer l'url du PDF à Gotenberg
-        $pdfContent = $this->pdfRequestService->generatePdfFromUrl($url);
+        if ($response->getStatusCode() === 200) {
+            $pdfContent = $response->getContent();
 
-        return new Response($pdfContent, Response::HTTP_OK, ['Content-Type' => 'application/pdf']);
+            return new Response($pdfContent, 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="file.pdf"',
+            ]);
+        } else {
+            return $this->json([
+                'error' => 'An error occurred while converting the URL to PDF. Please try again.',
+            ], $response->getStatusCode());
+        }
     }
 }
