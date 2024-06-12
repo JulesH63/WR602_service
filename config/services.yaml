@@ -20,5 +20,11 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
+    # Configuration du service Gotenberg
+    App\Service\GotenbergService:
+        arguments:
+            $client: '@http_client'
+            $gotenbergBaseUrl: '%env(GOTENBERG_URL)%'
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
